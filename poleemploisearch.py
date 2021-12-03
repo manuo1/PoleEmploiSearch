@@ -1,5 +1,5 @@
 import webbrowser
-from tqdm import tqdm
+from tqdm import tqdm # progress Bar 
 from html_manager.parser import Parser
 from html_manager.request import Request
 domain = "https://candidat.pole-emploi.fr" 
@@ -12,14 +12,28 @@ locations = [
     ('23147','100',"Nouzerolles (23360)"),
     ('41002','100',"Ange (41400)"),
 ]
-key_word = "python"
+key_words = [
+    "python",
+    "django",
+]
+full_remote = {
+    'location' : "01P",
+    'key_words' : key_words,
+    'full_remote_key_words' : [
+        "télétravail",
+        "télé-travail",
+        "teletravail",
+    ]
+
+}
 # posted_days can be 1,3,7,14 or 31
 posted_days = '7'
+# links to the offers contain base_result_url 
 base_result_url = "/offres/recherche/detail"
 parser = Parser()
 request = Request()
 
-def search_url(location):
+def search_url(location, key_word):
     """
         build full url with search parameters
     """
@@ -42,12 +56,12 @@ def show_more_results_link(raw_urls):
             return link
     return None
 
-def location_jobs(location):
+def location_jobs(location, key_word):
     """
         returns a list of links to the pages of the jobs found
     """
     job_urls = []
-    url = domain + search_url(location)
+    url = domain + search_url(location, key_word)
     print(f'Recherche des emplois pour {location}')
     # loop as long as there is the display more results button in the page
     while True:
@@ -63,26 +77,39 @@ def location_jobs(location):
         if show_more_results_link(raw_urls):
             url = domain + show_more_results_link(raw_urls)
         else:
-            # if no show more results in page => break the loop
+            # if no show more results button in page => break the loop
             break
     print(f'{len(job_urls)} Emplois trouvés')    
     return job_urls
 
-
-def main():
-    all_jobs_link = []
-    for location in locations:
-        for job in location_jobs(location):
-            if job not in all_jobs_link:
-                all_jobs_link.append(job)
-    offers = len(all_jobs_link)
-    print(f'{offers} Offres trouvées (après suppression des doublons)\n')
-    print(f'Ouverture des liens qui continnent le mot-clé {key_word}:\n')
+def opens_links_containing_the_keyword(all_jobs_link, key_word):
+    """
+        open in the browser all the jobs containing 
+        the key_word in the job detail
+    """
     for job_link in tqdm(all_jobs_link):
         url = domain + job_link
         html_in_page = request.html_in_page(url)
         if key_word.lower() in html_in_page.lower():
-            webbrowser.open(url)
+            webbrowser.open_new_tab(url)
+
+def main():
+    # localized job search
+    for key_word in key_words:
+        all_jobs_link = []
+        for location in locations:
+            for job in location_jobs(location,key_word):
+                if job not in all_jobs_link:
+                    all_jobs_link.append(job)
+        print(
+            f'{len(all_jobs_link)} Offres trouvées'
+            f' (après suppression des doublons)\n'
+            f'Recherche des offres qui contiennent le mot-clé {key_word}:\n'
+        )
+        opens_links_containing_the_keyword(all_jobs_link, key_word)
+    # completely remote job search
+    
+
 
 if __name__ == '__main__':
     main()
