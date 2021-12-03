@@ -1,16 +1,17 @@
+import webbrowser
 from html_manager.parser import Parser
 from html_manager.request import Request
 domain = "https://candidat.pole-emploi.fr" 
-# locations = (citycode , distance around)
+# locations = (citycode , distance around (km), name)
 locations = [
-    ('45234','50'),
-    ('58086','100'),
-    ('18058','100'),
-    ('03192','100'),
-    ('23147','100'),
-    ('41002','100'),
+    ('45234','50',"Orleans (45000)"),
+    ('58086','100',"Cosne Cours Sur Loire (58200)"),
+    ('18058','100',"Chateauneuf Sur Cher (18190)"),
+    ('03192','100',"Nades (03450)"),
+    ('23147','100',"Nouzerolles (23360)"),
+    ('41002','100',"Ange (41400)"),
 ]
-#locations = [('45234','50')]
+key_word = "python"
 # posted_days can be 1,3,7,14 or 31
 posted_days = '7'
 base_result_url = "/offres/recherche/detail"
@@ -21,10 +22,10 @@ def search_url(location):
     """
         build full url with search parameters
     """
-    citycode , distance = location
+    citycode , distance, name = location
     url = (
         f'/offres/recherche?domaine=M18&emission={posted_days}'
-        f'&lieux={citycode}&motsCles=python&offresPartenaires=true'
+        f'&lieux={citycode}&motsCles={key_word}&offresPartenaires=true'
         f'&rayon={distance}&tri=0&typeContrat=CDI,CDD'
     )
     return url
@@ -41,6 +42,9 @@ def show_more_results_link(raw_urls):
     return None
 
 def location_jobs(location):
+    """
+        returns a list of links to the pages of the jobs found
+    """
     job_urls = []
     url = domain + search_url(location)
     print(f'Recherche des emplois pour {location}')
@@ -60,20 +64,24 @@ def location_jobs(location):
         else:
             # if no show more results in page => break the loop
             break
-    print(f'{len(job_urls)} Emplois trouvés après suppression des doublons\n')    
+    print(f'{len(job_urls)} Emplois trouvés \n')    
     return job_urls
 
 
 def main():
-    all_location_jobs = []
+    all_jobs_link = []
     for location in locations:
         for job in location_jobs(location):
-            if job not in all_location_jobs:
-                all_location_jobs.append(job)
-
-    print(f'{len(all_location_jobs)}Offres trouvées\n')
-    
- 
+            if job not in all_jobs_link:
+                all_jobs_link.append(job)
+    print(f'{len(all_jobs_link)} Offres trouvées (après suppression des doublons)\n')
+    print('Ouverture des liens qui continnent le mot-clé {key_word}:\n')
+    for job_link in all_jobs_link:      
+        url = domain + job_link
+        html_in_page = request.html_in_page(url)
+        if key_word.lower() in html_in_page.lower():
+            print(f'\"{key_word}\" est présent dans l\'offre: {url}\nOuverture dans le navigateur')
+            webbrowser.open(url)
 
 if __name__ == '__main__':
     main()

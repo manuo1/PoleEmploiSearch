@@ -9,3 +9,4 @@ class Parser(BeautifulSoup):
             link = str(a_tag.get('href'))
             links.append(link)
         return links 
+    
