@@ -1,4 +1,5 @@
 import webbrowser
+from tqdm import tqdm
 from html_manager.parser import Parser
 from html_manager.request import Request
 domain = "https://candidat.pole-emploi.fr" 
@@ -64,7 +65,7 @@ def location_jobs(location):
         else:
             # if no show more results in page => break the loop
             break
-    print(f'{len(job_urls)} Emplois trouvés \n')    
+    print(f'{len(job_urls)} Emplois trouvés')    
     return job_urls
 
 
@@ -74,13 +75,13 @@ def main():
         for job in location_jobs(location):
             if job not in all_jobs_link:
                 all_jobs_link.append(job)
-    print(f'{len(all_jobs_link)} Offres trouvées (après suppression des doublons)\n')
-    print('Ouverture des liens qui continnent le mot-clé {key_word}:\n')
-    for job_link in all_jobs_link:      
+    offers = len(all_jobs_link)
+    print(f'{offers} Offres trouvées (après suppression des doublons)\n')
+    print(f'Ouverture des liens qui continnent le mot-clé {key_word}:\n')
+    for job_link in tqdm(all_jobs_link):
         url = domain + job_link
         html_in_page = request.html_in_page(url)
         if key_word.lower() in html_in_page.lower():
-            print(f'\"{key_word}\" est présent dans l\'offre: {url}\nOuverture dans le navigateur')
             webbrowser.open(url)
 
 if __name__ == '__main__':
