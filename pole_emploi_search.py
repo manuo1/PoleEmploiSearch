@@ -16,16 +16,6 @@ key_words = [
     "python",
     "django",
 ]
-full_remote = {
-    'location' : "01P",
-    'key_words' : key_words,
-    'full_remote_key_words' : [
-        "télétravail",
-        "télé-travail",
-        "teletravail",
-    ]
-
-}
 # posted_days can be 1,3,7,14 or 31
 posted_days = '7'
 # links to the offers contain base_result_url 
@@ -107,9 +97,6 @@ def main():
             f'Recherche des offres qui contiennent le mot-clé {key_word}:\n'
         )
         opens_links_containing_the_keyword(all_jobs_link, key_word)
-    # completely remote job search
-    
-
 
 if __name__ == '__main__':
     main()
