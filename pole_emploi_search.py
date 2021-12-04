@@ -5,6 +5,7 @@ from html_manager.request import Request
 domain = "https://candidat.pole-emploi.fr" 
 # locations = (citycode , distance around (km), name)
 # distances around can be 5, 10 , 20, 30, 40, 50, 60, 70, 80, 90, 100
+# the citycode must be found in url on the pole emploi site ("lieux=45234")
 locations = [
     ('45234','50',"Orleans (45000)"),
     ('58086','100',"Cosne Cours Sur Loire (58200)"),
@@ -73,7 +74,7 @@ def location_jobs(location, key_word):
     print(f'{len(job_urls)} Emplois trouvés')    
     return job_urls
 
-def select_links_containing_the_keyword(all_jobs_link, key_word):
+def jobs_containing_the_keyword(all_jobs_link, key_word):
     """
         select all the jobs containing 
         the key_word in the job detail
@@ -81,7 +82,9 @@ def select_links_containing_the_keyword(all_jobs_link, key_word):
     my_selection = []
     for job_link in tqdm(all_jobs_link):
         url = domain + job_link
+        # get the full html in job detail page
         html_in_page = request.html_in_page(url)
+        # select jobs
         if key_word.lower() in html_in_page.lower():
             my_selection.append(url)
     return my_selection
@@ -97,10 +100,11 @@ def main():
         print(
             f'{len(all_jobs_link)} Offres trouvées'
             f' (après suppression des doublons)\n'
-            f'Recherche des offres qui contiennent le mot-clé {key_word}:\n'
+            f'Recherche des offres dont le détail'
+            f' contiennent le mot-clé {key_word}:\n'
         )
         my_selection.extend(
-            select_links_containing_the_keyword(all_jobs_link, key_word)
+            jobs_containing_the_keyword(all_jobs_link, key_word)
         )
     for url in my_selection:
         webbrowser.open_new_tab(url)
