@@ -4,6 +4,7 @@ from html_manager.parser import Parser
 from html_manager.request import Request
 domain = "https://candidat.pole-emploi.fr" 
 # locations = (citycode , distance around (km), name)
+# distances around can be 5, 10 , 20, 30, 40, 50, 60, 70, 80, 90, 100
 locations = [
     ('45234','50',"Orleans (45000)"),
     ('58086','100',"Cosne Cours Sur Loire (58200)"),
@@ -16,7 +17,7 @@ key_words = [
     "python",
     "django",
 ]
-# posted_days can be 1,3,7,14 or 31
+# posted_days can be 1, 3, 7, 14, 31
 posted_days = '7'
 # links to the offers contain base_result_url 
 base_result_url = "/offres/recherche/detail"
@@ -52,7 +53,7 @@ def location_jobs(location, key_word):
     """
     job_urls = []
     url = domain + search_url(location, key_word)
-    print(f'Recherche des emplois pour {location}')
+    print(f'Recherche des emplois \"{key_word}\" pour le lieu : {location}')
     # loop as long as there is the display more results button in the page
     while True:
         # get full html
@@ -72,19 +73,21 @@ def location_jobs(location, key_word):
     print(f'{len(job_urls)} Emplois trouvés')    
     return job_urls
 
-def opens_links_containing_the_keyword(all_jobs_link, key_word):
+def select_links_containing_the_keyword(all_jobs_link, key_word):
     """
-        open in the browser all the jobs containing 
+        select all the jobs containing 
         the key_word in the job detail
     """
+    my_selection = []
     for job_link in tqdm(all_jobs_link):
         url = domain + job_link
         html_in_page = request.html_in_page(url)
         if key_word.lower() in html_in_page.lower():
-            webbrowser.open_new_tab(url)
+            my_selection.append(url)
+    return my_selection
 
 def main():
-    # localized job search
+    my_selection = []
     for key_word in key_words:
         all_jobs_link = []
         for location in locations:
@@ -96,7 +99,11 @@ def main():
             f' (après suppression des doublons)\n'
             f'Recherche des offres qui contiennent le mot-clé {key_word}:\n'
         )
-        opens_links_containing_the_keyword(all_jobs_link, key_word)
+        my_selection.extend(
+            select_links_containing_the_keyword(all_jobs_link, key_word)
+        )
+    for url in my_selection:
+        webbrowser.open_new_tab(url)
 
 if __name__ == '__main__':
     main()
