@@ -1,41 +1,43 @@
 import webbrowser
-from tqdm import tqdm # progress Bar 
+from tqdm import tqdm  # progress Bar
 from html_manager.parser import Parser
 from html_manager.request import Request
-domain = "https://candidat.pole-emploi.fr" 
+domain = "https://candidat.pole-emploi.fr"
 # locations = (citycode , distance around (km), name)
 # distances around can be 5, 10 , 20, 30, 40, 50, 60, 70, 80, 90, 100
 # the citycode must be found in url on the pole emploi site ("lieux=45234")
 locations = [
-    ('45234','50',"Orleans (45000)"),
-    ('58086','100',"Cosne Cours Sur Loire (58200)"),
-    ('18058','100',"Chateauneuf Sur Cher (18190)"),
-    ('03192','100',"Nades (03450)"),
-    ('23147','100',"Nouzerolles (23360)"),
-    ('41002','100',"Ange (41400)"),
+    ('45234', '50', "Orleans (45000)"),
+    ('58086', '100', "Cosne Cours Sur Loire (58200)"),
+    ('18058', '100', "Chateauneuf Sur Cher (18190)"),
+    ('03192', '100', "Nades (03450)"),
+    ('23147', '100', "Nouzerolles (23360)"),
+    ('41002', '100', "Ange (41400)"),
 ]
 key_words = [
     "python",
     "django",
 ]
 # posted_days can be 1, 3, 7, 14, 31
-posted_days = '7'
-# links to the offers contain base_result_url 
+posted_days = '3'
+# links to the offers contain base_result_url
 base_result_url = "/offres/recherche/detail"
 parser = Parser()
 request = Request()
+
 
 def search_url(location, key_word):
     """
         build full url with search parameters
     """
-    citycode , distance, name = location
+    citycode, distance, name = location
     url = (
         f'/offres/recherche?domaine=M18&emission={posted_days}'
         f'&lieux={citycode}&motsCles={key_word}&offresPartenaires=true'
         f'&rayon={distance}&tri=0&typeContrat=CDI,CDD'
     )
     return url
+
 
 def show_more_results_link(raw_urls):
     """
@@ -47,6 +49,7 @@ def show_more_results_link(raw_urls):
         if 'afficherplusderesultats' in link:
             return link
     return None
+
 
 def location_jobs(location, key_word):
     """
@@ -71,8 +74,9 @@ def location_jobs(location, key_word):
         else:
             # if no show more results button in page => break the loop
             break
-    print(f'{len(job_urls)} Emplois trouvés')    
+    print(f'{len(job_urls)} Emplois trouvés')
     return job_urls
+
 
 def jobs_containing_the_keyword(all_jobs_link, key_word):
     """
@@ -89,12 +93,13 @@ def jobs_containing_the_keyword(all_jobs_link, key_word):
             my_selection.append(url)
     return my_selection
 
+
 def main():
     my_selection = []
     for key_word in key_words:
         all_jobs_link = []
         for location in locations:
-            for job in location_jobs(location,key_word):
+            for job in location_jobs(location, key_word):
                 if job not in all_jobs_link:
                     all_jobs_link.append(job)
         print(
@@ -108,6 +113,7 @@ def main():
         )
     for url in my_selection:
         webbrowser.open_new_tab(url)
+
 
 if __name__ == '__main__':
     main()
