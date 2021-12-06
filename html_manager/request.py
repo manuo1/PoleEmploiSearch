@@ -1,11 +1,12 @@
 import urllib.request
 from urllib.error import URLError, HTTPError
 
+
 class Request():
 
-    def html_in_page(self,url): 
+    def html_in_page(self, url):
         try:
-            request_response = urllib.request.urlopen(url, timeout=10)
+            request_response = urllib.request.urlopen(url, timeout=20)
         except HTTPError as e:
             # do something
             print('Error code: ', e.code)
